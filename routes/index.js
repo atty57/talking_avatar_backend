@@ -10,7 +10,8 @@ router.post('/talk', function(req, res, next) {
     res.json(result);    
   })
   .catch(err => {
-    res.json({});
+    console.error(err);  // Log the error for debugging
+    res.status(500).json({ error: err.message });
   });
 
 
