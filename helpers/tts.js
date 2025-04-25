@@ -1,5 +1,7 @@
 // azure-cognitiveservices-speech.js
 require('dotenv').config()
+console.log("AZURE_KEY:", process.env.AZURE_KEY);
+console.log("AZURE_REGION:", process.env.AZURE_REGION);
 const sdk = require('microsoft-cognitiveservices-speech-sdk');
 const blendShapeNames = require('./blendshapeNames');
 const _ = require('lodash');
@@ -11,7 +13,7 @@ let SSML = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml
 </voice>
 </speak>`;
 
-const key = process.env.AZURE_KEY;
+const key = "4aygbMTDSgHJJpzzwkolUNxRgIw1o3hKP9K2Y1keWEfKlolICG8JJQQJ99BDACYeBjFXJ3w3AAAYACOGBtlk";
 const region = process.env.AZURE_REGION;
         
 /**
