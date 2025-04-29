@@ -1,4 +1,4 @@
-// azure-cognitiveservices-speech.js
+// helpers/tts.js
 require('dotenv').config()
 console.log("AZURE_KEY:", process.env.AZURE_KEY);
 console.log("AZURE_REGION:", process.env.AZURE_REGION);
@@ -13,36 +13,86 @@ let SSML = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml
 </voice>
 </speak>`;
 
-const key = "4aygbMTDSgHJJpzzwkolUNxRgIw1o3hKP9K2Y1keWEfKlolICG8JJQQJ99BDACYeBjFXJ3w3AAAYACOGBtlk";
+const key = process.env.AZURE_KEY || "4aygbMTDSgHJJpzzwkolUNxRgIw1o3hKP9K2Y1keWEfKlolICG8JJQQJ99BDACYeBjFXJ3w3AAAYACOGBtlk";
 const region = process.env.AZURE_REGION;
-        
+
 /**
- * Node.js server code to convert text to speech
- * @returns stream
- * @param {*} key your resource key
- * @param {*} region your resource region
- * @param {*} text text to convert to audio/speech
- * @param {*} filename optional - best for long text - temp file for converted speech/audio
+ * Streaming text-to-speech function
+ * @param {*} text text to convert to speech
+ * @param {*} voice voice configuration
+ * @returns Promise
  */
-const textToSpeech = async (text, voice)=> {
+const textToSpeechStream = async (text, voice) => {
+  return new Promise((resolve, reject) => {
+    let ssml = SSML.replace("__TEXT__", text);
     
+    const speechConfig = sdk.SpeechConfig.fromSubscription(key, region);
+    // Use PCM format for lower latency
+    speechConfig.speechSynthesisOutputFormat = 
+      sdk.SpeechSynthesisOutputFormat.Raw16Khz16BitMonoPcm;
+    
+    const synthesizer = new sdk.SpeechSynthesizer(speechConfig);
+    
+    let blendData = [];
+    let timeStep = 1/60;
+    let timeStamp = 0;
+    let audioChunks = [];
+    
+    // Handle viseme events for facial animation
+    synthesizer.visemeReceived = function (s, e) {
+      var animation = JSON.parse(e.animation);
+      
+      _.each(animation.BlendShapes, blendArray => {
+        let blend = {};
+        _.each(blendShapeNames, (shapeName, i) => {
+          blend[shapeName] = blendArray[i];
+        });
+        
+        blendData.push({
+          time: timeStamp,
+          blendshapes: blend
+        });
+        timeStamp += timeStep;
+      });
+    };
+    
+    // Add event handler to collect audio chunks
+    synthesizer.synthesizing = function (s, e) {
+      if (e.result.reason === sdk.ResultReason.SynthesizingAudio) {
+        audioChunks.push(e.result.audioData);
+      }
+    };
+    
+    synthesizer.speakSsmlAsync(
+      ssml,
+      result => {
+        synthesizer.close();
+        // Combine all audio chunks into a single buffer
+        const audioData = Buffer.concat(audioChunks);
+        resolve({ blendData, audioData });
+      },
+      error => {
+        synthesizer.close();
+        reject(error);
+      }
+    );
+  });
+};
+
+// Original function (unmodified)
+const textToSpeech = async (text, voice)=> {
     // convert callback function to promise
     return new Promise((resolve, reject) => {
-        
-
         let ssml = SSML.replace("__TEXT__", text);
-
         
         const speechConfig = sdk.SpeechConfig.fromSubscription(key, region);
         speechConfig.speechSynthesisOutputFormat = 5; // mp3
         
         let audioConfig = null;
         
-        // if (filename) {
         let randomString = Math.random().toString(36).slice(2, 7);
         let filename = `./public/speech-${randomString}.mp3`;
         audioConfig = sdk.AudioConfig.fromAudioFileOutput(filename);
-        // }
 
         let blendData = [];
         let timeStep = 1/60;
@@ -52,12 +102,9 @@ const textToSpeech = async (text, voice)=> {
 
         // Subscribes to viseme received event
         synthesizer.visemeReceived = function (s, e) {
-
-            // `Animation` is an xml string for SVG or a json string for blend shapes
             var animation = JSON.parse(e.animation);
 
             _.each(animation.BlendShapes, blendArray => {
-
                 let blend = {};
                 _.each(blendShapeNames, (shapeName, i) => {
                     blend[shapeName] = blendArray[i];
@@ -69,17 +116,13 @@ const textToSpeech = async (text, voice)=> {
                 });
                 timeStamp += timeStep;
             });
-
         }
-
 
         synthesizer.speakSsmlAsync(
             ssml,
             result => {
-                
                 synthesizer.close();
                 resolve({blendData, filename: `/speech-${randomString}.mp3`});
-
             },
             error => {
                 synthesizer.close();
@@ -88,4 +131,4 @@ const textToSpeech = async (text, voice)=> {
     });
 };
 
-module.exports = textToSpeech;
+module.exports = { textToSpeech, textToSpeechStream };
