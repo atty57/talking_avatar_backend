@@ -7,9 +7,11 @@ const blendShapeNames = require('./blendshapeNames');
 const _ = require('lodash');
 
 let SSML = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="en-US">
-<voice name="en-US-JennyNeural">
-  <mstts:viseme type="FacialExpression"/>
-  __TEXT__
+<voice name="en-US-AriaNeural">
+  <mstts:express-as style="empathetic">
+    <mstts:viseme type="FacialExpression"/>
+    __TEXT__
+  </mstts:express-as>
 </voice>
 </speak>`;
 
