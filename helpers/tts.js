@@ -13,7 +13,7 @@ let SSML = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml
 </voice>
 </speak>`;
 
-const key = process.env.AZURE_KEY || "4aygbMTDSgHJJpzzwkolUNxRgIw1o3hKP9K2Y1keWEfKlolICG8JJQQJ99BDACYeBjFXJ3w3AAAYACOGBtlk";
+const key = process.env.AZURE_KEY || "7542ff2d8b814808a0a3dfc1987f5d70";
 const region = process.env.AZURE_REGION;
 
 /**
