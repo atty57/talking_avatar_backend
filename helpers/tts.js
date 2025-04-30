@@ -29,7 +29,7 @@ const textToSpeechStream = async (text, voice) => {
     const speechConfig = sdk.SpeechConfig.fromSubscription(key, region);
     // Use PCM format for lower latency
     speechConfig.speechSynthesisOutputFormat = 
-      sdk.SpeechSynthesisOutputFormat.Raw16Khz16BitMonoPcm;
+      sdk.SpeechSynthesisOutputFormat.Raw8Khz8BitMonoALaw;
     
     const synthesizer = new sdk.SpeechSynthesizer(speechConfig);
     
