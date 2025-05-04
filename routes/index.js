@@ -12,6 +12,14 @@ router.post('/talk-stream', async function(req, res, next) {
     const prompt = req.body.prompt || text;
     const model = req.body.model;
     
+    // Extract viseme tuning parameters
+    const visemeOptions = {
+        visemeIntensity: req.body.visemeIntensity,
+        visemeSmoothing: req.body.visemeSmoothing,
+        visemeEmphasis: req.body.visemeEmphasis,
+        addIdleVisemes: req.body.addIdleVisemes
+    };
+    
     console.log(`/talk-stream request: useAI=${useAI}, model=${model}`);
     
     // If useAI flag is true, generate response with LLM
@@ -34,7 +42,7 @@ router.post('/talk-stream', async function(req, res, next) {
     
     console.log(`Generating streaming speech for text: "${text}"`);
     // Process speech with the final text
-    const result = await ttsHelpers.textToSpeechStream(text, req.body.voice);
+    const result = await ttsHelpers.textToSpeechStream(text, req.body.voice, visemeOptions);
     
     // Set headers for the response
     res.set({
@@ -51,7 +59,7 @@ router.post('/talk-stream', async function(req, res, next) {
   }
 });
 
-/* Original talk endpoint (unchanged) */
+/* Original talk endpoint (updated with viseme options) */
 router.post('/talk', async function(req, res, next) {
   try {
     // Extract request parameters
@@ -59,6 +67,14 @@ router.post('/talk', async function(req, res, next) {
     const useAI = req.body.useAI;
     const prompt = req.body.prompt || text;
     const model = req.body.model;
+    
+    // Extract viseme tuning parameters
+    const visemeOptions = {
+        visemeIntensity: req.body.visemeIntensity,
+        visemeSmoothing: req.body.visemeSmoothing,
+        visemeEmphasis: req.body.visemeEmphasis,
+        addIdleVisemes: req.body.addIdleVisemes
+    };
     
     console.log(`/talk request: useAI=${useAI}, model=${model}`);
     
@@ -82,7 +98,7 @@ router.post('/talk', async function(req, res, next) {
     
     console.log(`Generating speech for text: "${text}"`);
     // Process speech with the final text
-    const result = await ttsHelpers.textToSpeech(text, req.body.voice);
+    const result = await ttsHelpers.textToSpeech(text, req.body.voice, visemeOptions);
     
     // Return the result with the possibly modified text
     res.json({
