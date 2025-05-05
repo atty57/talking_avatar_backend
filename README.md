@@ -111,8 +111,8 @@ The viseme data is mapped to standard facial animation blend shapes.
 ## Optional LLM Integration
 
 For AI-powered responses, the backend can integrate with Ollama using:
-- `LLM_API_URL` environment variable (default: http://localhost:11434/api/generate)
-- `LLM_MODEL` environment variable (default: llama3.2)
+- `LLM_API_URL` environment variable 
+- `LLM_MODEL` environment variable 
 
 This enables the avatar to generate contextual responses to user input.
 
