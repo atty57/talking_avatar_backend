@@ -12,6 +12,12 @@ router.post('/talk-stream', async function(req, res, next) {
     const prompt = req.body.prompt || text;
     const model = req.body.model;
     
+    // Extract voice parameters
+    const voiceParams = {
+        voiceName: req.body.voiceName,
+        voiceStyle: req.body.voiceStyle
+    };
+    
     // Extract viseme tuning parameters
     const visemeOptions = {
         visemeIntensity: req.body.visemeIntensity,
@@ -20,7 +26,7 @@ router.post('/talk-stream', async function(req, res, next) {
         addIdleVisemes: req.body.addIdleVisemes
     };
     
-    console.log(`/talk-stream request: useAI=${useAI}, model=${model}`);
+    console.log(`/talk-stream request: useAI=${useAI}, model=${model}, voice=${voiceParams.voiceName}, style=${voiceParams.voiceStyle}`);
     
     // If useAI flag is true, generate response with LLM
     if (useAI) {
@@ -42,7 +48,7 @@ router.post('/talk-stream', async function(req, res, next) {
     
     console.log(`Generating streaming speech for text: "${text}"`);
     // Process speech with the final text
-    const result = await ttsHelpers.textToSpeechStream(text, req.body.voice, visemeOptions);
+    const result = await ttsHelpers.textToSpeechStream(text, voiceParams, visemeOptions);
     
     // Set headers for the response
     res.set({
@@ -68,6 +74,12 @@ router.post('/talk', async function(req, res, next) {
     const prompt = req.body.prompt || text;
     const model = req.body.model;
     
+    // Extract voice parameters
+    const voiceParams = {
+        voiceName: req.body.voiceName,
+        voiceStyle: req.body.voiceStyle
+    };
+    
     // Extract viseme tuning parameters
     const visemeOptions = {
         visemeIntensity: req.body.visemeIntensity,
@@ -76,7 +88,7 @@ router.post('/talk', async function(req, res, next) {
         addIdleVisemes: req.body.addIdleVisemes
     };
     
-    console.log(`/talk request: useAI=${useAI}, model=${model}`);
+    console.log(`/talk request: useAI=${useAI}, model=${model}, voice=${voiceParams.voiceName}, style=${voiceParams.voiceStyle}`);
     
     // If useAI flag is true, generate response with LLM
     if (useAI) {
@@ -98,7 +110,7 @@ router.post('/talk', async function(req, res, next) {
     
     console.log(`Generating speech for text: "${text}"`);
     // Process speech with the final text
-    const result = await ttsHelpers.textToSpeech(text, req.body.voice, visemeOptions);
+    const result = await ttsHelpers.textToSpeech(text, voiceParams, visemeOptions);
     
     // Return the result with the possibly modified text
     res.json({

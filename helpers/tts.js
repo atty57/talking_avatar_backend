@@ -6,6 +6,10 @@ const sdk = require('microsoft-cognitiveservices-speech-sdk');
 const blendShapeNames = require('./blendshapeNames');
 const _ = require('lodash');
 
+// Default voice settings
+const DEFAULT_VOICE = "en-US-AriaNeural";
+const DEFAULT_STYLE = "empathetic";
+
 // Viseme fine-tuning configuration
 let VISEME_INTENSITY = 1; // Adjust this value to increase/decrease overall intensity
 let VISEME_SMOOTHING = true; // Enable/disable smoothing between visemes
@@ -24,8 +28,8 @@ let VISEME_EMPHASIS = {
 let ADD_IDLE_VISEMES = true; // Enable/disable micro-expressions during pauses
 
 let SSML = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="en-US">
-<voice name="en-US-AriaNeural">
-  <mstts:express-as style="empathetic">
+<voice name="__VOICE__">
+  <mstts:express-as style="__STYLE__">
     <mstts:viseme type="FacialExpression"/>
     __TEXT__
   </mstts:express-as>
@@ -234,11 +238,11 @@ function generateMicroExpressions(duration, frameRate, startTime) {
 /**
  * Streaming text-to-speech function
  * @param {string} text - Text to convert to speech
- * @param {object} voice - Voice configuration
+ * @param {object} voiceParams - Voice configuration parameters
  * @param {object} options - Viseme fine-tuning options
  * @returns {Promise} - Promise resolving to audio and blend data
  */
-const textToSpeechStream = async (text, voice, options = {}) => {
+const textToSpeechStream = async (text, voiceParams = {}, options = {}) => {
     // Apply options
     const currentVisemeIntensity = VISEME_INTENSITY;
     const currentVisemeSmoothing = VISEME_SMOOTHING;
@@ -253,9 +257,16 @@ const textToSpeechStream = async (text, voice, options = {}) => {
     if (options.visemeEmphasis) {
         Object.assign(VISEME_EMPHASIS, options.visemeEmphasis);
     }
+    
+    // Get voice parameters with defaults
+    const voiceName = voiceParams.voiceName || DEFAULT_VOICE;
+    const voiceStyle = voiceParams.voiceStyle || DEFAULT_STYLE;
 
     return new Promise((resolve, reject) => {
-        let ssml = SSML.replace("__TEXT__", text);
+        let ssml = SSML
+            .replace("__VOICE__", voiceName)
+            .replace("__STYLE__", voiceStyle)
+            .replace("__TEXT__", text);
         
         const speechConfig = sdk.SpeechConfig.fromSubscription(key, region);
         // Use PCM format for lower latency
@@ -332,11 +343,11 @@ const textToSpeechStream = async (text, voice, options = {}) => {
 /**
  * File-based text-to-speech function
  * @param {string} text - Text to convert to speech
- * @param {object} voice - Voice configuration
+ * @param {object} voiceParams - Voice configuration parameters
  * @param {object} options - Viseme fine-tuning options
  * @returns {Promise} - Promise resolving to blend data and filename
  */
-const textToSpeech = async (text, voice, options = {}) => {
+const textToSpeech = async (text, voiceParams = {}, options = {}) => {
     // Apply options
     const currentVisemeIntensity = VISEME_INTENSITY;
     const currentVisemeSmoothing = VISEME_SMOOTHING;
@@ -352,9 +363,16 @@ const textToSpeech = async (text, voice, options = {}) => {
         Object.assign(VISEME_EMPHASIS, options.visemeEmphasis);
     }
     
+    // Get voice parameters with defaults
+    const voiceName = voiceParams.voiceName || DEFAULT_VOICE;
+    const voiceStyle = voiceParams.voiceStyle || DEFAULT_STYLE;
+    
     // convert callback function to promise
     return new Promise((resolve, reject) => {
-        let ssml = SSML.replace("__TEXT__", text);
+        let ssml = SSML
+            .replace("__VOICE__", voiceName)
+            .replace("__STYLE__", voiceStyle)
+            .replace("__TEXT__", text);
         
         const speechConfig = sdk.SpeechConfig.fromSubscription(key, region);
         speechConfig.speechSynthesisOutputFormat = 5; // mp3
