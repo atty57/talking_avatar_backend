@@ -4,7 +4,7 @@ const axios = require('axios');
 
 // Configuration for Ollama
 const LLM_API_URL = process.env.LLM_API_URL || 'http://localhost:11434/api/generate';
-const LLM_MODEL = process.env.LLM_MODEL || 'llama3.2';
+const LLM_MODEL = process.env.LLM_MODEL || 'llama3';
 
 // Clinical expert persona
 const CLINICAL_EXPERT_PROMPT = `You are a friendly medical assistant having a natural conversation. 
